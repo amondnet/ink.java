@@ -16,4 +16,4 @@ include 'api'
 include 'services:webservice'
 */
 
-rootProject.name = 'blade-ink'
+rootProject.name = 'ink-java'

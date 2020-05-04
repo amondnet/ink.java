@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Stack;
@@ -218,42 +219,47 @@ public class Story extends RTObject implements VariablesState.VariableChanged {
 		this(contentContainer, null);
 	}
 
+  /**
+   * Construct a Story Object using a JSON Map compiled through inklecate.
+   */
+	public Story(Map<String, Object> rootObject) throws Exception {
+    this((Container) null);
+    Object versionObj = rootObject.get("inkVersion");
+    if (versionObj == null)
+      throw new Exception("ink version number not found. Are you sure it's a valid .ink.json file?");
+
+    int formatFromFile = versionObj instanceof String ? Integer.parseInt((String) versionObj) : (int) versionObj;
+
+    if (formatFromFile > inkVersionCurrent) {
+      throw new Exception("Version of ink used to build story was newer than the current version of the engine");
+    } else if (formatFromFile < inkVersionMinimumCompatible) {
+      throw new Exception(
+          "Version of ink used to build story is too old to be loaded by this version of the engine");
+    } else if (formatFromFile != inkVersionCurrent) {
+      System.out.println(
+          "WARNING: Version of ink used to build story doesn't match current version of engine. Non-critical, but recommend synchronising.");
+    }
+
+    Object rootToken = rootObject.get("root");
+    if (rootToken == null)
+      throw new Exception("Root node for ink not found. Are you sure it's a valid .ink.json file?");
+
+    Object listDefsObj = rootObject.get("listDefs");
+    if (listDefsObj != null) {
+      listDefinitions = Json.jTokenToListDefinitions(listDefsObj);
+    }
+
+    RTObject runtimeObject = Json.jTokenToRuntimeObject(rootToken);
+    mainContentContainer = runtimeObject instanceof Container ? (Container) runtimeObject : null;
+
+    resetState();
+  }
+
 	/**
 	 * Construct a Story Object using a JSON String compiled through inklecate.
 	 */
 	public Story(String jsonString) throws Exception {
-		this((Container) null);
-		HashMap<String, Object> rootObject = SimpleJson.textToDictionary(jsonString);
-
-		Object versionObj = rootObject.get("inkVersion");
-		if (versionObj == null)
-			throw new Exception("ink version number not found. Are you sure it's a valid .ink.json file?");
-
-		int formatFromFile = versionObj instanceof String ? Integer.parseInt((String) versionObj) : (int) versionObj;
-
-		if (formatFromFile > inkVersionCurrent) {
-			throw new Exception("Version of ink used to build story was newer than the current version of the engine");
-		} else if (formatFromFile < inkVersionMinimumCompatible) {
-			throw new Exception(
-					"Version of ink used to build story is too old to be loaded by this version of the engine");
-		} else if (formatFromFile != inkVersionCurrent) {
-			System.out.println(
-					"WARNING: Version of ink used to build story doesn't match current version of engine. Non-critical, but recommend synchronising.");
-		}
-
-		Object rootToken = rootObject.get("root");
-		if (rootToken == null)
-			throw new Exception("Root node for ink not found. Are you sure it's a valid .ink.json file?");
-
-		Object listDefsObj = rootObject.get("listDefs");
-		if (listDefsObj != null) {
-			listDefinitions = Json.jTokenToListDefinitions(listDefsObj);
-		}
-
-		RTObject runtimeObject = Json.jTokenToRuntimeObject(rootToken);
-		mainContentContainer = runtimeObject instanceof Container ? (Container) runtimeObject : null;
-
-		resetState();
+    this(SimpleJson.textToDictionary(jsonString));
 	}
 
 	void addError(String message) throws Exception {
