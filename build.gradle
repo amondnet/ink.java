@@ -5,12 +5,12 @@ apply plugin: 'signing'
 
 group = 'com.bladecoder.ink'
 
-sourceCompatibility = 1.7
-targetCompatibility=1.7
+sourceCompatibility = 1.8
+targetCompatibility=1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
