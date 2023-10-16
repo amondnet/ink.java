@@ -3,6 +3,7 @@ package com.bladecoder.ink.runtime.test;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bladecoder.ink.runtime.InkList;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,5 +40,6 @@ public class BasicTextSpecTest {
 		Assert.assertEquals(2, text.size());
 		Assert.assertEquals("Line.", text.get(0));
 		Assert.assertEquals("Other line.", text.get(1));
+
 	}
 }
